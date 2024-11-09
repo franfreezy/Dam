@@ -16,9 +16,11 @@ void setup() {
   }
   else {
     LoadCell.setCalFactor(calibrationValue); 
-    delay(1000);
-    LoadCell.tareNoDelay();
+    delay(100);
+    
   }
+  delay(1000);
+  LoadCell.tareNoDelay();
 }
 
 void loop() {
