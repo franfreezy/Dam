@@ -1,8 +1,28 @@
 #include <Arduino.h>
 #include "loadcell.h"
+#include "comms.h"
 
 void setup() {
-  Serial.begin(57600); 
+  //general configuration
+  Serial.begin(115200); 
+
+  //gsm and mqtt configuration
+  sim800lSerial.begin(9600);
+  delay(3000);
+  Serial.println("Initializing modem...");
+  modem.restart();
+  if (!modem.gprsConnect(apn, user, pass)) {
+    Serial.println("Failed to connect to GPRS");
+    return;
+  }
+  Serial.println("Connected to GPRS");
+
+  // Set up the MQTT client
+  mqttClient.setServer(broker, 1883);
+  mqttClient.setCallback(mqttCallback);
+  connectToMqtt();
+
+  //loadcell configuration
   delay(10);
   LoadCell.begin();
   float calibrationValue; 
@@ -24,6 +44,7 @@ void setup() {
 }
 
 void loop() {
-  damMass();
+  espPiComms();
+  //damMass();
 
 }
