@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "loadcell.h"
-
+#include "tiltsensor.h"
 void setup() {
   
   //loadcell configuration
@@ -23,6 +23,9 @@ void setup() {
   }
   delay(1000);
   LoadCell.tareNoDelay();
+  //tilt sensor configuration
+
+  pinMode(tiltsensordata,INPUT_PULLUP);
 }
 
 void loop() {
