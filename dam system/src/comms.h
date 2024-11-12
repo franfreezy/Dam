@@ -51,13 +51,24 @@ void reconnect() {
   }
 }
 
+String gsmMqtt(String message)
+{
 
-void gsmMqtt() {
-  if (!mqttClient.connected()) {
-    reconnect();
-  }
-  mqttClient.loop(); 
-  mqttClient.publish(topic, "Hello from SIM800L over GSM!");
-  Serial.println("published");
-  delay(10000);  
+    if (!mqttClient.connected())
+    {
+        reconnect();
+    }
+
+    mqttClient.loop();
+
+    if (mqttClient.publish(topic, message.c_str()))
+    {
+        Serial.println("Message published successfully!");
+        return "Success";
+    }
+    else
+    {
+        Serial.println("Failed to publish message.");
+        return "Fail";
+    }
 }

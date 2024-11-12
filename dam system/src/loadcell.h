@@ -14,29 +14,27 @@ HX711_ADC LoadCell(HX711_dout, HX711_sck);
 const int calVal_eepromAdress = 0;
 unsigned long t = 0;
 
-void damMass()
+String damMass()
 {
     static boolean newDataReady = 0;
-    const int serialPrintInterval = 3000; 
+    const int serialPrintInterval = 3000;
+    static unsigned long t = 0;
 
-    
     if (LoadCell.update())
         newDataReady = true;
 
-    
     if (newDataReady)
     {
         if (millis() > t + serialPrintInterval)
         {
-            int i = LoadCell.getData();
-            Serial.print("Load_cell output val: ");
-            Serial.println(i);
+            int loadMass = LoadCell.getData();  
             newDataReady = 0;
             t = millis();
+            return String(loadMass);  
         }
     }
 
-    // receive command from serial terminal, send 't' to initiate tare operation:
+    
     if (Serial.available() > 0)
     {
         char inByte = Serial.read();
@@ -44,9 +42,11 @@ void damMass()
             LoadCell.tareNoDelay();
     }
 
-    // check if last tare operation is complete:
+   
     if (LoadCell.getTareStatus() == true)
     {
         Serial.println("Tare complete");
     }
+
+    return ""; 
 }

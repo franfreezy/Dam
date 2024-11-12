@@ -5,6 +5,9 @@
 #include "actuators.h"
 #include "comms.h"
 
+unsigned long lastPublishTime = 0;
+const unsigned long publishInterval = 10000; 
+
 void setup()
 {
   Serial.begin(57600);
@@ -55,12 +58,29 @@ void setup()
   // actuators initialisation
   pinMode(spillwayrelay, OUTPUT);
   pinMode(alarmrelay, OUTPUT);
+
+  ///ultrasonic
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
 }
 
 void loop()
 { 
-  Serial.println("in the loop");
-  gsmMqtt();
-  //damMass();
+  if (!mqttClient.connected()) {
+    reconnect();
+  }
+  
+  mqttClient.loop();
+
+  int datadamvol=damvolume();
+  String mass=damMass();
+  String distance=getDistance();
+  if (millis() - lastPublishTime >= publishInterval) {
+    lastPublishTime = millis();
+    String status = gsmMqtt("dam status: "+String(datadamvol)+" dam mass: "+ mass + " water level: "+distance);
+    Serial.println("Publish status: " + status);
+  }
+  
+  //
   //triggerSpillway();
 }
