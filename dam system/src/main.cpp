@@ -3,12 +3,34 @@
 #include "tiltsensor.h"
 #include "ultrasonic.h"
 #include "actuators.h"
+#include "comms.h"
 
 void setup()
 {
+  Serial.begin(57600);
+  //setup gsm
+   Serial3.begin(9600); 
+
+  
+  Serial.println("Initializing modem...");
+  modem.restart();
+
+  
+  Serial.print("Connecting to safaricom...");
+  if (!modem.gprsConnect(apn, user, pass)) {
+    Serial.println(" failed");
+    while (true);
+  }
+  Serial.println(" success");
+
+  // Configure the MQTT server and connect
+  mqtt.setServer(mqttServer, mqttPort);
+  mqtt.setCallback(mqttCallback);
+
+  connectToMqtt();
 
   // loadcell configuration
-  Serial.begin(57600);
+  
   delay(10);
   LoadCell.begin();
   float calibrationValue;
