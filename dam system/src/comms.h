@@ -1,45 +1,63 @@
-#define TINY_GSM_MODEM_SIM800 
+#define TINY_GSM_MODEM_SIM800     
+#define GSM_BAUD 9600   
 #include <TinyGsmClient.h>
 #include <PubSubClient.h>
+#define Serial Serial            
+#define SerialAT Serial3            
 
-// Replace with your network credentials
-const char apn[] = "safaricom";  // Set your APN
-const char user[] = "";         // Leave empty if no user is required
-const char pass[] = "";         // Leave empty if no password is required
 
-// MQTT server details
-const char* mqttServer = "your_mqtt_broker_address";
+const char* mqttServer = "cklogistics.cloud.shiftr.io";
 const int mqttPort = 1883;
-const char* mqttUser = "your_mqtt_username"; // Leave empty if no username is required
-const char* mqttPassword = "your_mqtt_password"; // Leave empty if no password is required
+const char* mqttUser = "logistics";        
+const char* mqttPassword = "uZlp3Dbsk6wYqWGe";    
 
-// Topic
-const char* topic = "test/arduino";
+const char* topic = "freezy/damsystem";
 
-TinyGsm modem(Serial3);
+
+TinyGsm modem(SerialAT);           
 TinyGsmClient client(modem);
-PubSubClient mqtt(client);
+PubSubClient mqttClient(client);
 
-void connectToMqtt() {
-  while (!mqtt.connected()) {
-    Serial.print("Connecting to MQTT...");
-    if (mqtt.connect("MegaClient", mqttUser, mqttPassword)) {
-      Serial.println(" connected");
-      mqtt.subscribe(topic);
-    } else {
-      Serial.print(" failed, rc=");
-      Serial.print(mqtt.state());
-      Serial.println(" retrying in 5 seconds");
-      delay(5000);
-    }
-  }
-}
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
+
+const char* apn = "safaricom";     
+const char* gprsUser = "";          
+const char* gprsPass = "";          
+
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
   Serial.print(topic);
-  Serial.print(". Message: ");
+  Serial.print("] ");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
+}
+
+void reconnect() {
+  while (!mqttClient.connected()) {
+    Serial.print("Connecting to MQTT...");
+    
+    
+    if (mqttClient.connect("arduino", "cklogistics", "public")) {
+      Serial.println("Connected to MQTT");
+      mqttClient.subscribe(topic);  
+    } else {
+      // If connection fails, print the error and retry
+      Serial.print("Failed to connect, return code: ");
+      Serial.println(mqttClient.state());  
+      delay(5000);  
+    }
+  }
+}
+
+
+void gsmMqtt() {
+  if (!mqttClient.connected()) {
+    reconnect();
+  }
+  mqttClient.loop(); 
+  mqttClient.publish(topic, "Hello from SIM800L over GSM!");
+  Serial.println("published");
+  delay(10000);  
 }

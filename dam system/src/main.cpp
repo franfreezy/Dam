@@ -8,26 +8,22 @@
 void setup()
 {
   Serial.begin(57600);
-  //setup gsm
-   Serial3.begin(9600); 
-
+  SerialAT.begin(GSM_BAUD);        
   
-  Serial.println("Initializing modem...");
-  modem.restart();
-
-  
-  Serial.print("Connecting to safaricom...");
-  if (!modem.gprsConnect(apn, user, pass)) {
-    Serial.println(" failed");
-    while (true);
+  delay(3000); 
+  modem.restart();                  
+  String modemInfo = modem.getModemInfo();
+  Serial.println("Modem Info: " + modemInfo);
+  Serial.println("Connecting to the GSM network...");
+  if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
+    Serial.println("Failed to connect to GPRS.");
+    return;
   }
-  Serial.println(" success");
+  Serial.println("Connected to GPRS.");
 
-  // Configure the MQTT server and connect
-  mqtt.setServer(mqttServer, mqttPort);
-  mqtt.setCallback(mqttCallback);
-
-  connectToMqtt();
+  mqttClient.setServer(mqttServer, mqttPort);
+  mqttClient.setCallback(callback);
+  
 
   // loadcell configuration
   
@@ -62,7 +58,9 @@ void setup()
 }
 
 void loop()
-{
-  damMass();
-  triggerSpillway();
+{ 
+  Serial.println("in the loop");
+  gsmMqtt();
+  //damMass();
+  //triggerSpillway();
 }
