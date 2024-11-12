@@ -4,6 +4,7 @@ int tiltsensordata=5;
 void damvolume(){
     if((millis()-damvolumestatus)>=5000){
         damvolumestatus=millis();
-        int digitalRead(tiltsensordata);
+        int damvolumestate= digitalRead(tiltsensordata);
+        Serial.println(damvolumestate);
     }
 }
